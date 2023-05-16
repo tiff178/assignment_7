@@ -263,16 +263,63 @@ class Target(GameObject):
         """
         pass
 
-class MovingTargets(Target):
-    def __init__(self, coord=None, color=None, rad=30):
-        super().__init__(coord, color, rad)
-        self.vx = randint(-2, +2)
-        self.vy = randint(-2, +2)
+# class MovingTargets(Target):
+#     def __init__(self, coord=None, color=None, rad=30):
+#         super().__init__(coord, color, rad)
+#         self.vx = randint(-2, +2)
+#         self.vy = randint(-2, +2)
     
-    def move(self):
-        self.coord[0] += self.vx
-        self.coord[1] += self.vy
+#     def move(self):
+#         self.coord[0] += self.vx
+#         self.coord[1] += self.vy
 
+class ButterflyTarget(Target):
+    '''
+    Butterfly class. Creates a butterfly target that moves horizontally back and forth across the screen.
+    '''
+    def __init__(self, coord=None, image=None, rad=30, speed=3):
+        super().__init__(coord, image, rad)
+        self.speed = speed
+        self.direction = 1
+        self.image = pg.image.load("butterfly.png")
+        self.image = pg.transform.scale(self.image, (rad*2, rad*2))
+
+    def move(self):
+        self.coord[0] += self.direction * self.speed
+        if self.coord[0] < self.rad or self.coord[0] > SCREEN_SIZE[0] - self.rad:
+            self.direction *= -1
+    
+    def draw(self, screen):
+        rect = self.image.get_rect()
+        rect.center = self.coord
+        screen.blit(self.image, rect)
+
+class BirdTarget(Target):
+    '''
+    Bird class. Creates a bird target that moves diagonally across the screen.
+    '''
+    def __init__(self, coord=None, image=None, rad=30, speed=3):
+        super().__init__(coord, image, rad)
+        self.speed = speed
+        self.x_direction = 1
+        self.y_direction = 1
+        self.image = pg.image.load("bird.png")
+        self.image = pg.transform.scale(self.image, (rad*2, rad*2))
+
+    def move(self):
+        self.coord[0] += self.x_direction * self.speed
+        self.coord[1] += self.y_direction * self.speed
+        
+        # Reverse direction when reaching the edges of the screen
+        if self.coord[0] < self.rad or self.coord[0] > SCREEN_SIZE[0] - self.rad:
+            self.x_direction *= -1
+        if self.coord[1] < self.rad or self.coord[1] > SCREEN_SIZE[1] - self.rad:
+            self.y_direction *= -1
+
+    def draw(self, screen):
+        rect = self.image.get_rect()
+        rect.center = self.coord
+        screen.blit(self.image, rect)
 
 class ScoreTable:
     '''
@@ -316,9 +363,11 @@ class Manager:
         Adds new targets.
         '''
         for i in range(self.n_targets):
-            self.targets.append(MovingTargets(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
+            self.targets.append(BirdTarget(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
+                30 - max(0, self.score_t.score()))))
+            self.targets.append(ButterflyTarget(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
     
     def process(self, events, screen):
