@@ -8,9 +8,10 @@ pg.font.init()
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-PINK = (255, 204, 255)
+PINK = (255, 220, 255)
 BLUE = (153, 153, 255)
 RED = (255, 0, 0)
+PURPLE = (220, 200, 255)
 
 SCREEN_SIZE = (800, 600)
 
@@ -338,9 +339,9 @@ class ScoreTable:
 
     def draw(self, screen):
         score_surf = []
-        score_surf.append(self.font.render("Destroyed: {}".format(self.t_destr), True, WHITE))
-        score_surf.append(self.font.render("Balls used: {}".format(self.b_used), True, WHITE))
-        score_surf.append(self.font.render("Total: {}".format(self.score()), True, RED))
+        score_surf.append(self.font.render("Destroyed: {}".format(self.t_destr), True, BLACK))
+        score_surf.append(self.font.render("Balls used: {}".format(self.b_used), True, BLACK))
+        score_surf.append(self.font.render("Total: {}".format(self.score()), True, WHITE))
         for i in range(3):
             screen.blit(score_surf[i], [10, 10 + 30*i])
 
@@ -468,7 +469,7 @@ mgr = Manager(n_targets=3)
 
 while not done:
     clock.tick(15)
-    screen.fill(BLACK)
+    screen.fill(PURPLE)
 
     done = mgr.process(pg.event.get(), screen)
 
