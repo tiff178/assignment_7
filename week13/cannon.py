@@ -1,12 +1,15 @@
 import numpy as np
 import pygame as pg
 from random import randint, gauss
+import random
 
 pg.init()
 pg.font.init()
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+PINK = (255, 204, 255)
+BLUE = (153, 153, 255)
 RED = (255, 0, 0)
 
 SCREEN_SIZE = (800, 600)
@@ -22,7 +25,6 @@ class GameObject:
     
     def draw(self, screen):
         pass  
-
 
 class Shell(GameObject):
     '''
@@ -77,7 +79,7 @@ class Cannon(GameObject):
     '''
     Cannon class. Manages it's renderring, movement and striking.
     '''
-    def __init__(self, coord=[30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED):
+    def __init__(self, coord=[30, SCREEN_SIZE[1]-50], angle=0, max_pow=50, min_pow=10, color=PINK):
         '''
         Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
         '''
@@ -119,17 +121,31 @@ class Cannon(GameObject):
         '''
         self.angle = np.arctan2(target_pos[1] - self.coord[1], target_pos[0] - self.coord[0])
 
-    def move(self, inc):
+    def move(self, inc_x):
         '''
-        Changes vertical position of the gun.
+        Changes horizontal position of the tank. 
         '''
-        if (self.coord[1] > 30 or inc > 0) and (self.coord[1] < SCREEN_SIZE[1] - 30 or inc < 0):
-            self.coord[1] += inc
+        x = self.coord[0] + inc_x
+        if x > SCREEN_SIZE[0] - 30:
+            self.coord[0] = SCREEN_SIZE[0] - 30
+        elif x < 30:
+            self.coord[0] = 30
+        else:
+            self.coord[0] = x
 
     def draw(self, screen):
         '''
-        Draws the gun on the screen.
+        Draws the tank with cannon (gun) on the screen.
         '''
+        # Tank Shape
+        static_rect = pg.Rect(self.coord[0] - 60//2, self.coord[1], 55, 15)
+        pg.draw.rect(screen, self.color, static_rect)
+        pg.draw.circle(screen, self.color,
+                       (self.coord[0] - 16, self.coord[1] + 18), 7) # back wheel
+        pg.draw.circle(screen, self.color,
+                       (self.coord[0] + 13, self.coord[1] + 18), 7) # front wheel
+
+        # shape of the cannon (gun)
         gun_shape = []
         vec_1 = np.array([int(5*np.cos(self.angle - np.pi/2)), int(5*np.sin(self.angle - np.pi/2))])
         vec_2 = np.array([int(self.pow*np.cos(self.angle)), int(self.pow*np.sin(self.angle))])
@@ -139,6 +155,74 @@ class Cannon(GameObject):
         gun_shape.append((gun_pos + vec_2 - vec_1).tolist())
         gun_shape.append((gun_pos - vec_1).tolist())
         pg.draw.polygon(screen, self.color, gun_shape)
+
+class Enemy(Cannon):
+    '''
+    Enemy class. Manages it's renderring, movement and striking. This is the rival cannon (enemy) that will attack current cannon.
+    '''
+    def __init__(self, coord=[200, SCREEN_SIZE[1]-50], angle=0, max_pow=50, min_pow=10, color=BLUE):
+        '''
+        Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
+        '''
+        super().__init__(coord, angle, max_pow, min_pow, color=BLUE)
+        self.direction = 1
+        self.move_counter = 0
+        self.move_threshold = 50
+
+    def move_left(self):
+        self.move(-15)
+
+    def move_right(self):
+        self.move(15)
+
+    def update(self):
+        self.move_counter += 1
+        if self.move_counter >= self.move_threshold:
+            self.move_counter = 0
+            self.direction *= -1
+            if self.direction == -1:
+                self.move_left()
+            else:
+                self.move_right()
+        if random.randint(0,100) < 5:
+            target_angle = random.uniform(-np.pi/4, np.pi/4)
+            self.set_angle([self.coord[0] + 100 * np.cos(target_angle), self.coord[1] + 100 * np.sin(target_angle)])
+            self.activate()
+            return self.strike()
+
+class Enemy2(Cannon):
+    '''
+    Enemy class. Manages it's renderring, movement and striking. This is the rival cannon (enemy) that will attack current cannon.
+    '''
+    def __init__(self, coord=[500, SCREEN_SIZE[1]-50], angle=0, max_pow=50, min_pow=10, color=WHITE):
+        '''
+        Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
+        '''
+        super().__init__(coord, angle, max_pow, min_pow, color=WHITE)
+        self.direction = 1
+        self.move_counter = 0
+        self.move_threshold = 60
+
+    def move_left(self):
+        self.move(-20)
+
+    def move_right(self):
+        self.move(20)
+
+    def update(self):
+        self.move_counter += 1
+        if self.move_counter >= self.move_threshold:
+            self.move_counter = 0
+            self.direction *= -1
+            if self.direction == -1:
+                self.move_left()
+            else:
+                self.move_right()
+        if random.randint(0,100) < 5:
+            target_angle = random.uniform(-np.pi/4, np.pi/4)
+            self.set_angle([self.coord[0] + 100 * np.cos(target_angle), self.coord[1] + 100 * np.sin(target_angle)])
+            self.activate()
+            return self.strike()
 
 
 class Target(GameObject):
@@ -213,7 +297,6 @@ class ScoreTable:
         for i in range(3):
             screen.blit(score_surf[i], [10, 10 + 30*i])
 
-
 class Manager:
     '''
     Class that manages events' handling, ball's motion and collision, target creation, etc.
@@ -223,6 +306,8 @@ class Manager:
         self.gun = Cannon()
         self.targets = []
         self.score_t = ScoreTable()
+        self.enemy = Enemy()
+        self.enemy2 = Enemy2()
         self.n_targets = n_targets
         self.new_mission()
 
@@ -235,8 +320,7 @@ class Manager:
                 30 - max(0, self.score_t.score()))))
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
-
-
+    
     def process(self, events, screen):
         '''
         Runs all necessary method for each iteration. Adds new targets, if previous are destroyed.
@@ -265,10 +349,10 @@ class Manager:
             if event.type == pg.QUIT:
                 done = True
             elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_UP:
-                    self.gun.move(-5)
-                elif event.key == pg.K_DOWN:
-                    self.gun.move(5)
+                if event.key == pg.K_LEFT:
+                    self.gun.move(-10)
+                elif event.key == pg.K_RIGHT:
+                    self.gun.move(10)
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.gun.activate()
@@ -288,6 +372,8 @@ class Manager:
             target.draw(screen)
         self.gun.draw(screen)
         self.score_t.draw(screen)
+        self.enemy.draw(screen)
+        self.enemy2.draw(screen)
 
     def move(self):
         '''
@@ -303,6 +389,8 @@ class Manager:
         for i, target in enumerate(self.targets):
             target.move()
         self.gun.gain()
+        self.enemy.update()
+        self.enemy2.update()
 
     def collide(self):
         '''
