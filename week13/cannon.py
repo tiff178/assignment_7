@@ -39,6 +39,7 @@ class Shell(GameObject):
         self.color = color
         self.rad = rad
         self.is_alive = True
+        self.image = pg.image.load("flower.png").convert_alpha() #new for pic for bullet
 
     def check_corners(self, refl_ort=0.8, refl_par=0.9):
         '''
@@ -68,16 +69,19 @@ class Shell(GameObject):
 
     def draw(self, screen):
         '''
-        Draws the ball on appropriate surface.
+        Draws the ball on appropriate surface. 
         '''
-        pg.draw.circle(screen, self.color, self.coord, self.rad)
+        #pg.draw.circle(screen, self.color, self.coord, self.rad)
+        #pg.draw.rect(screen, self.color, (self.coord[0]-self.rad, self.coord[1]-self.rad, 2*self.rad, 2*self.rad)) #this is work
+        #pg.draw.line(screen, self.color, (self.coord[0], self.coord[1] - self.rad), (self.coord[0], self.coord[1] + self.rad), 2) #work
+        screen.blit(self.image, (int(self.coord[0] - self.rad), int(self.coord[1] - self.rad))) # work insert the pic
 
 
 class Cannon(GameObject):
     '''
     Cannon class. Manages it's renderring, movement and striking.
     '''
-    def __init__(self, coord=[30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED):
+    def __init__(self, coord=[30, SCREEN_SIZE[1]-30], angle=0, max_pow=50, min_pow=10, color=RED):
         '''
         Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
         '''
