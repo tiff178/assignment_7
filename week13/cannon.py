@@ -256,10 +256,6 @@ class Target(GameObject):
         self.coord = coord
         self.rad = rad
 
-        if color == None:
-            color = rand_color()
-        self.color = color
-
     def check_collision(self, ball):
         '''
         Checks whether the ball bumps into target.
@@ -270,9 +266,9 @@ class Target(GameObject):
 
     def draw(self, screen):
         '''
-        Draws the target on the screen
+        Draws the target on the screen (note: there are no still targets on the screen)
         '''
-        pg.draw.circle(screen, self.color, self.coord, self.rad)
+        pass
 
     def move(self):
         """
@@ -280,16 +276,6 @@ class Target(GameObject):
         :return: None
         """
         pass
-
-# class MovingTargets(Target):
-#     def __init__(self, coord=None, color=None, rad=30):
-#         super().__init__(coord, color, rad)
-#         self.vx = randint(-2, +2)
-#         self.vy = randint(-2, +2)
-    
-#     def move(self):
-#         self.coord[0] += self.vx
-#         self.coord[1] += self.vy
 
 class Bombs:
     def __init__(self, coord, vel=(0, 1), width=10, height=5, color=BLUE):
