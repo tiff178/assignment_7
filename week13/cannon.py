@@ -27,6 +27,23 @@ class GameObject:
     def draw(self, screen):
         pass  
 
+class Bomb(GameObject):
+    def __init__(self, coord, vel, rad=20, image=None):
+        self.coord = coord
+        self.vel = vel
+        self.rad = rad
+        self.image = image
+
+    def move(self, time=1, grav=0):
+        self.vel[1] += grav
+        for i in range(2):
+            self.coord[i] += time * self.vel[i]
+    
+    def draw(self, screen):
+        rect = self.image.get_rect()
+        rect.center = self.coord
+        screen.blit(self.image, rect)
+
 class Shell(GameObject):
     '''
     The ball class. Creates a ball, controls it's movement and implement it's rendering.
@@ -230,7 +247,7 @@ class Target(GameObject):
     '''
     Target class. Creates target, manages it's rendering and collision with a ball event.
     '''
-    def __init__(self, coord=None, color=None, rad=30):
+    def __init__(self, coord=None, color=BLUE, rad=30):
         '''
         Constructor method. Sets coordinate, color and radius of the target.
         '''
@@ -273,6 +290,52 @@ class Target(GameObject):
 #     def move(self):
 #         self.coord[0] += self.vx
 #         self.coord[1] += self.vy
+
+class Bombs:
+    def __init__(self, coord, vel=(0, 1), width=10, height=5, color=BLUE):
+        self.coord = coord
+        self.vel = vel
+        self.width = width
+        self.height = height
+        self.color = color
+        self.is_alive = True
+
+    def move(self):
+        self.coord[1] += self.vel[1]
+        if self.coord[1] > SCREEN_SIZE[1]:
+            self.is_alive = False
+
+    def draw(self, screen):
+        pg.draw.rect(screen, self.color,
+                     (self.coord[0], self.coord[1], self.width, self.height))
+
+class Clouds(Target):
+    def __init__(self, coord=None, image=None, rad=30):
+        super().__init__(coord, image, rad)
+        self.vx = randint(-2, +2)
+        self.vy = randint(-2, +2)
+        self.falling_bombs = []
+        self.image = pg.image.load("cloud.png")
+        self.image = pg.transform.scale(self.image, (rad*4, rad*2))
+
+    def move(self):
+        self.coord[0] += self.vx
+        self.coord[1] += self.vy
+
+        if randint(1, 100) < 5:
+            self.falling_bombs.append(Bombs(list(self.coord)))
+
+        for bombs in self.falling_bombs:
+            bombs.move()
+            if not bombs.is_alive:
+                self.falling_bombs.remove(bombs)
+
+    def draw(self, screen):
+        rect = self.image.get_rect()
+        rect.center = self.coord
+        screen.blit(self.image, rect)
+        for bombs in self.falling_bombs:
+            bombs.draw(screen)
 
 class ButterflyTarget(Target):
     '''
@@ -341,7 +404,7 @@ class ScoreTable:
         score_surf = []
         score_surf.append(self.font.render("Destroyed: {}".format(self.t_destr), True, BLACK))
         score_surf.append(self.font.render("Balls used: {}".format(self.b_used), True, BLACK))
-        score_surf.append(self.font.render("Total: {}".format(self.score()), True, WHITE))
+        score_surf.append(self.font.render("Total: {}".format(self.score()), True, BLACK))
         for i in range(3):
             screen.blit(score_surf[i], [10, 10 + 30*i])
 
@@ -369,6 +432,8 @@ class Manager:
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
             self.targets.append(ButterflyTarget(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
+                30 - max(0, self.score_t.score()))))
+            self.targets.append(Clouds(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
     
     def process(self, events, screen):
