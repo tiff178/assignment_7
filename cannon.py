@@ -23,22 +23,6 @@ class GameObject:
     def draw(self, screen):
         pass  
 
-class Bomb(GameObject):
-    def __init__(self, coord, vel, rad=20, image=None):
-        self.coord = coord
-        self.vel = vel
-        self.rad = rad
-        self.image = image
-
-    def move(self, time=1, grav=0):
-        self.vel[1] += grav
-        for i in range(2):
-            self.coord[i] += time * self.vel[i]
-    
-    def draw(self, screen):
-        rect = self.image.get_rect()
-        rect.center = self.coord
-        screen.blit(self.image, rect)
 
 class Shell(GameObject):
     '''
@@ -84,10 +68,7 @@ class Shell(GameObject):
         '''
         Draws the ball on appropriate surface. 
         '''
-        #pg.draw.circle(screen, self.color, self.coord, self.rad)
-        #pg.draw.rect(screen, self.color, (self.coord[0]-self.rad, self.coord[1]-self.rad, 2*self.rad, 2*self.rad)) #this is work
-        #pg.draw.line(screen, self.color, (self.coord[0], self.coord[1] - self.rad), (self.coord[0], self.coord[1] + self.rad), 2) #work
-        screen.blit(self.image, (int(self.coord[0] - self.rad), int(self.coord[1] - self.rad))) # work insert the pic
+        screen.blit(self.image, (int(self.coord[0] - self.rad), int(self.coord[1] - self.rad)))
 
 
 class Cannon(GameObject):
@@ -173,7 +154,7 @@ class Cannon(GameObject):
 
 class Enemy(Cannon):
     '''
-    Enemy class. Manages it's renderring, movement and striking. This is the rival cannon (enemy) that will attack current cannon.
+    Enemy class. Inherits Cannon class and manages it's renderring, movement and striking. This is the rival cannon (enemy) that will attack current cannon.
     '''
     def __init__(self, coord=[200, SCREEN_SIZE[1]-50], angle=0, max_pow=50, min_pow=10, color=BLUE):
         '''
@@ -210,7 +191,7 @@ class Enemy(Cannon):
 
 class Enemy2(Cannon):
     '''
-    Enemy class. Manages it's renderring, movement and striking. This is the rival cannon (enemy) that will attack current cannon.
+    Enemy class. Inherits Cannon class and manages it's renderring, movement and striking. This is the rival cannon (enemy) that will attack current cannon.
     '''
     def __init__(self, coord=[500, SCREEN_SIZE[1]-50], angle=0, max_pow=50, min_pow=10, color=WHITE):
         '''
@@ -281,7 +262,13 @@ class Target(GameObject):
         pass
 
 class Bombs:
+    '''
+    Bomb class. Creates bombs that will be dropped by the cloud targets onto the user cannon.
+    '''
     def __init__(self, coord, vel=(0, 1), width=10, height=5, color=BLUE):
+        '''
+        Initial state that creates the bombs when this class is called.
+        '''
         self.coord = coord
         self.vel = vel
         self.width = width
@@ -299,7 +286,13 @@ class Bombs:
                      (self.coord[0], self.coord[1], self.width, self.height))
 
 class Clouds(Target):
+    '''
+    Clouds class. Inherits Tragets class and creates targets that look like clouds. These targets drop bombs onto user's cannon.
+    '''
     def __init__(self, coord=None, image=None, rad=30):
+        '''
+        Intializes the beginning state of clouds when called especially the image and random movement.
+        '''
         super().__init__(coord, image, rad)
         self.vx = randint(-2, +2)
         self.vy = randint(-2, +2)
@@ -328,7 +321,7 @@ class Clouds(Target):
 
 class ButterflyTarget(Target):
     '''
-    Butterfly class. Creates a butterfly target that moves horizontally back and forth across the screen.
+    Butterfly class. Inherits Target class and creates a butterfly target that moves horizontally back and forth across the screen.
     '''
     def __init__(self, coord=None, image=None, rad=30, speed=3):
         super().__init__(coord, image, rad)
@@ -349,7 +342,7 @@ class ButterflyTarget(Target):
 
 class BirdTarget(Target):
     '''
-    Bird class. Creates a bird target that moves diagonally across the screen.
+    Bird class. Inherits target clas and creates a bird target that moves diagonally across the screen.
     '''
     def __init__(self, coord=None, image=None, rad=30, speed=3):
         super().__init__(coord, image, rad)
