@@ -15,10 +15,6 @@ PURPLE = (220, 200, 255)
 
 SCREEN_SIZE = (800, 600)
 
-
-def rand_color():
-    return (randint(0, 255), randint(0, 255), randint(0, 255))
-
 class GameObject:
 
     def move(self):
@@ -48,15 +44,12 @@ class Shell(GameObject):
     '''
     The ball class. Creates a ball, controls it's movement and implement it's rendering.
     '''
-    def __init__(self, coord, vel, rad=20, color=None):
+    def __init__(self, coord, vel, rad=20):
         '''
         Constructor method. Initializes ball's parameters and initial values.
         '''
         self.coord = coord
         self.vel = vel
-        if color == None:
-            color = rand_color()
-        self.color = color
         self.rad = rad
         self.is_alive = True
         self.image = pg.image.load("flower.png").convert_alpha() #new for pic for bullet
@@ -101,7 +94,7 @@ class Cannon(GameObject):
     '''
     Cannon class. Manages it's renderring, movement and striking.
     '''
-    def __init__(self, coord=[30, SCREEN_SIZE[1]-50], angle=0, max_pow=50, min_pow=10, color=PINK):
+    def __init__(self, coord=[400, SCREEN_SIZE[1]-50], angle=0, max_pow=50, min_pow=10, color=PINK):
         '''
         Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
         '''
@@ -192,12 +185,15 @@ class Enemy(Cannon):
         self.move_threshold = 50
 
     def move_left(self):
+        '''Render Enemy Cannon's movement for left. '''
         self.move(-15)
 
     def move_right(self):
+        '''Render Enemy Cannon's movement for right. '''
         self.move(15)
 
     def update(self):
+        '''Enemy Cannon can move autonomously left or right.'''
         self.move_counter += 1
         if self.move_counter >= self.move_threshold:
             self.move_counter = 0
@@ -226,12 +222,15 @@ class Enemy2(Cannon):
         self.move_threshold = 60
 
     def move_left(self):
+        '''Similar to original enemy cannon - Render Enemy Cannon's movement for left.'''
         self.move(-20)
 
     def move_right(self):
+        '''Similar to original enemy cannon - Render Enemy Cannon's movement for left.'''
         self.move(20)
 
     def update(self):
+        '''Similar to original enemy cannon - Enemy Cannon can move autonomously left or right.'''
         self.move_counter += 1
         if self.move_counter >= self.move_threshold:
             self.move_counter = 0
