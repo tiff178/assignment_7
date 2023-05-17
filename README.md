@@ -23,6 +23,9 @@ Tiffany Truong, Katie Pham, Thu Nguyen
 **History of Project Challenges (Commit & Issues)**
 - Sync Issues (Merge branch to main branch): Some of us were unable to sync changes, but we were able to resolve it. 
 
+**Takeaway**
+- We learned how OOP works in Python, how to utilize functions, etc in order to create a game. We further learned how to utilize Git/Github to make our changes. 
+
 **Video Link**
 
 [Repository Link - Group 4: Group Assignment](https://github.com/tiff178/assignment_7)
