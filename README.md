@@ -26,6 +26,6 @@ Tiffany Truong, Katie Pham, Thu Nguyen
 **Takeaway**
 - We learned how OOP works in Python, how to utilize functions, etc in order to create a game. We further learned how to utilize Git/Github to make our changes. 
 
-**Extra Credit - Video Link:**  https://youtu.be/SkSBAPVF7NM
+**Extra Credit:** [Video Link] (https://youtu.be/SkSBAPVF7NM)
 
 [Repository Link - Group 4: Group Assignment](https://github.com/tiff178/assignment_7)
